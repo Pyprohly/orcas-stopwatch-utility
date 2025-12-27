@@ -39,6 +39,9 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
     devDependencies:
+      '@naverpay/eslint-plugin-use-client':
+        specifier: ^0.0.2
+        version: 0.0.2
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.1.18
@@ -358,6 +361,9 @@ packages:
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
+
+  '@naverpay/eslint-plugin-use-client@0.0.2':
+    resolution: {integrity: sha512-zIX5leUqjgf1iOiaMdlV5nSm202+3zjwp1tuCS2BuXo57yGMwgUgsYL1Rll3FHEufSHbpLlumakl0HMSceuxWw==}
 
   '@next/env@16.1.1':
     resolution: {integrity: sha512-3oxyM97Sr2PqiVyMyrZUtrtM3jqqFxOQJVuKclDsgj/L728iZt/GyslkN4NwarledZATCenbk4Offjk1hQmaAA==}
@@ -2492,6 +2498,10 @@ snapshots:
       '@emnapi/runtime': 1.7.1
       '@tybys/wasm-util': 0.10.1
     optional: true
+
+  '@naverpay/eslint-plugin-use-client@0.0.2':
+    dependencies:
+      micromatch: 4.0.8
 
   '@next/env@16.1.1': {}
 
