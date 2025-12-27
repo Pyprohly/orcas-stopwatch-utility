@@ -1,0 +1,10 @@
+{
+  "id": "222c6811-e8fa-47c1-a930-9d534f46ad1d",
+  "name": "Orcas Timekeeper Tool",
+  "short_name": "Orcas",
+  "description": "An app to help time keeping",
+  "display": "standalone",
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable" }
+  ]
+}

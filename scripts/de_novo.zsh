@@ -18,7 +18,7 @@ test .(NF) && {
     exit 1
 }
 
-### - - -
+# - - -
 
 git init -b main
 
@@ -46,14 +46,14 @@ git add -A
 
 git commit -m 'Initialise Next.js'
 
-### - - -
+# - - -
 
 cat << EOF >>'.git/info/exclude'
 .*
 /${0##*/}
 EOF
 
-### - - -
+# - - -
 
 rm -f README.md
 rm -f src/app/{layout,page}.tsx
@@ -67,14 +67,14 @@ rm -f $^files.bak
 git add -A
 git commit -m 'Prepare Next.js'
 
-### - - -
+# - - -
 
 pnpx shadcn init -d --base-color zinc
 
 git add -A
 git commit -m 'Initiate shadcn/ui'
 
-### - - -
+# - - -
 
 shadcn_components=(
     button
@@ -88,14 +88,14 @@ cp -R -- src/components/ui{,-facsimile}
 git add -A
 git commit -m 'Add UI components'
 
-### - - -
+# - - -
 
-pnpm add -D '@naverpay/eslint-plugin-use-client'
+pnpm add -D @naverpay/eslint-plugin-use-client
 
 git add -A
 git commit -m 'Add outstanding dependencies'
 
-### - - -
+# - - -
 
 pnpm install
 
@@ -103,7 +103,7 @@ git add pnpm-lock.yaml
 
 git commit -m 'Install extraneous packages' || :
 
-### - - -
+# - - -
 
 [[ -e .vscode ]] || {
   mkdir .vscode
@@ -116,18 +116,16 @@ git commit -m 'Install extraneous packages' || :
 }
 EOF
 }
-
 git add -f '.vscode/'
 
 cat <<'EOF' >>'.prettierrc.json'
 { "plugins": ["prettier-plugin-tailwindcss"] }
 EOF
-
 git add -f '.prettierrc.json'
 
 git commit -m 'Add workspace settings'
 
-### - - -
+# - - -
 
 mkdir scripts
 cp -- "$0" "scripts/de_novo.${0:e}"
@@ -135,7 +133,7 @@ cp -- "$0" "scripts/de_novo.${0:e}"
 git add -A
 git commit -m 'Add de novo script'
 
-### - - -
+# - - -
 
 [[ -d $PREDECESSOR_ROOT ]] && {
     file=package.json
@@ -168,10 +166,10 @@ git commit -m 'Add de novo script'
     git --no-pager log -1 --stat
 }
 
-### - - -
+# - - -
 
 pnpm exec next typegen
 
-### - - -
+# - - -
 
 echo DONE.
