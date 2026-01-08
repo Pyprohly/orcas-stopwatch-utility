@@ -26,6 +26,24 @@ function getFontSize(len: number): string {
   return "text-2xl"
 }
 
+export type ComputeDisplayDataResult = {
+  formattedTimeParts: { whole: string; fractional: string }
+  fontSizeClass: string
+  radialWipeProgress: number
+}
+export function computeDisplayData(timeMs: number): ComputeDisplayDataResult {
+  const seconds = timeMs / 1000
+  const formattedTime = formatStopwatchTime(seconds)
+  const formattedTimeParts = splitTime(formattedTime)
+  const fontSizeClass = getFontSize(formattedTime.length)
+  const radialWipeProgress = Math.min(seconds / (15 * 60), 1) * 100
+  return {
+    formattedTimeParts,
+    fontSizeClass,
+    radialWipeProgress,
+  }
+}
+
 type DispatchActions =
     | 'start'
     | 'stop'
@@ -124,6 +142,7 @@ export function Stopwatch({
           break
         case 'stop':
           setRunning(false)
+          setTimeValue(stopwatchRef.current.getElapsedTime())
           break
         case 'reset':
           setTimeValue(0)
@@ -159,17 +178,25 @@ export function Stopwatch({
     setRestoreStateEffectTrigger,
   })
 
+  const progressRef = React.useRef<HTMLDivElement>(null)
+  const timerDisplayRef = React.useRef<HTMLDivElement>(null)
+  const wholePartRef = React.useRef<HTMLSpanElement>(null)
+  const fractionalPartRef = React.useRef<HTMLSpanElement>(null)
+
   stopwatchHooks.useStopwatchAnimation({
     stopwatchRef,
-    setTimeValue,
     running,
+    progressRef,
+    timerDisplayRef,
+    wholePartRef,
+    fractionalPartRef,
   })
 
-  const seconds = timeValue / 1000
-  const formattedTime = formatStopwatchTime(seconds)
-  const formattedTimeParts = splitTime(formattedTime)
-  const fontSizeClass = getFontSize(formattedTime.length)
-  const radialWipeProgress = Math.min(seconds / (15 * 60), 1) * 100
+  const {
+    formattedTimeParts,
+    fontSizeClass,
+    radialWipeProgress,
+  } = computeDisplayData(timeValue)
 
   const {
     hasMounted,
@@ -197,6 +224,7 @@ export function Stopwatch({
     >
       {/* Background Progress Effect */}
       <div
+        ref={progressRef}
         className="pointer-events-none absolute inset-0 opacity-35"
         style={{
           '--progress': `${radialWipeProgress}%`,
@@ -231,13 +259,14 @@ export function Stopwatch({
 
         {/* Timer Display */}
         <div
+          ref={timerDisplayRef}
           className={cn(
             "flex items-baseline justify-center font-mono leading-none font-bold tabular-nums select-all",
             fontSizeClass,
           )}
         >
           <SaturateFaintColors>
-            <span className="text-primary">
+            <span ref={wholePartRef} className="text-primary">
               {formattedTimeParts.whole}
             </span>
           </SaturateFaintColors>
@@ -250,7 +279,10 @@ export function Stopwatch({
                   ,
             }}
           >
-            .{formattedTimeParts.fractional}
+            .
+            <span ref={fractionalPartRef}>
+              {formattedTimeParts.fractional}
+            </span>
           </span>
         </div>
 

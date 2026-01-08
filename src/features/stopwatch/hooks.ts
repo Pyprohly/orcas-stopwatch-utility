@@ -2,7 +2,7 @@
 
 import React from "react"
 import * as persistence from "@/utils/persistence"
-import type { ReactifiedStopwatch } from "./component"
+import { computeDisplayData, type ReactifiedStopwatch } from "./component"
 
 export function useStopwatchPersistence({
   idt,
@@ -103,18 +103,58 @@ export function useStopwatchPersistence({
 
 export function useStopwatchAnimation({
   stopwatchRef,
-  setTimeValue,
   running,
+  progressRef,
+  timerDisplayRef,
+  wholePartRef,
+  fractionalPartRef,
 }: {
   stopwatchRef: React.RefObject<ReactifiedStopwatch>
-  setTimeValue: React.Dispatch<number>
   running: boolean
+  progressRef: React.RefObject<HTMLDivElement | null>
+  timerDisplayRef: React.RefObject<HTMLDivElement | null>
+  wholePartRef: React.RefObject<HTMLSpanElement | null>
+  fractionalPartRef: React.RefObject<HTMLSpanElement | null>
 }) {
   const rafHandleRef: React.RefObject<number | null> = React.useRef(null)
 
   React.useEffect(() => {
+    if (!running) { return }
+
     function animate(timestamp: DOMHighResTimeStamp) {
-      setTimeValue(stopwatchRef.current.getElapsedTime(timestamp))
+      if (
+        progressRef.current != null
+        && timerDisplayRef.current != null
+        && wholePartRef.current != null
+        && fractionalPartRef.current != null
+      ) {
+        const timeValue = stopwatchRef.current.getElapsedTime(timestamp)
+        const {
+          formattedTimeParts,
+          fontSizeClass,
+          radialWipeProgress,
+        } = computeDisplayData(timeValue)
+
+        let el: HTMLElement
+        el = progressRef.current
+        if (el.style.getPropertyValue('--progress') !== `${radialWipeProgress}%`) {
+          el.style.setProperty('--progress', `${radialWipeProgress}%`)
+        }
+        el = timerDisplayRef.current
+        if (!el.classList.contains(fontSizeClass)) {
+          el.classList.remove("text-lg", "text-xl", "text-2xl")
+          el.classList.add(fontSizeClass)
+        }
+        el = wholePartRef.current
+        if (el.textContent !== formattedTimeParts.whole) {
+          el.textContent = formattedTimeParts.whole
+        }
+        el = fractionalPartRef.current
+        if (el.textContent !== formattedTimeParts.fractional) {
+          el.textContent = formattedTimeParts.fractional
+        }
+      }
+
       rafHandleRef.current = running ? requestAnimationFrame(animate) : null
     }
     rafHandleRef.current = requestAnimationFrame(animate)
@@ -122,5 +162,12 @@ export function useStopwatchAnimation({
       if (rafHandleRef.current == null) { return }
       cancelAnimationFrame(rafHandleRef.current)
     }
-  }, [stopwatchRef, setTimeValue, running])
+  }, [
+    stopwatchRef,
+    running,
+    progressRef,
+    timerDisplayRef,
+    wholePartRef,
+    fractionalPartRef,
+  ])
 }
