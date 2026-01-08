@@ -15,9 +15,14 @@ import { useDarkModePreferenceContext } from "@/lib/theme-preference-facilitator
 import { SaturateFaintColors } from "../theming/saturate-faint-colors"
 
 function splitTime(formattedTime: string): { whole: string; fractional: string } {
-  const m = formattedTime.match(/^(.*)\.([^.]*)$/)
-  if (m == null) { throw Error() }
-  return { whole: m[1], fractional: m[2] }
+  const lastDotIndex = formattedTime.lastIndexOf(".")
+  if (lastDotIndex < 0) {
+    throw new Error("dot separator missing")
+  }
+  return {
+    whole: formattedTime.slice(0, lastDotIndex),
+    fractional: formattedTime.slice(lastDotIndex + 1),
+  }
 }
 
 function getFontSize(len: number): string {

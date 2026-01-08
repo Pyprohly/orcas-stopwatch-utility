@@ -101,6 +101,9 @@ export function useStopwatchPersistence({
   ])
 }
 
+const FPS = 60
+const FPS_INTERVAL_MS = 1000 / FPS
+
 export function useStopwatchAnimation({
   stopwatchRef,
   running,
@@ -117,41 +120,46 @@ export function useStopwatchAnimation({
   fractionalPartRef: React.RefObject<HTMLSpanElement | null>
 }) {
   const rafHandleRef: React.RefObject<number | null> = React.useRef(null)
+  const lastUpdateRef: React.RefObject<number | null> = React.useRef(null)
 
   React.useEffect(() => {
     if (!running) { return }
 
     function animate(timestamp: DOMHighResTimeStamp) {
-      if (
-        progressRef.current != null
-        && timerDisplayRef.current != null
-        && wholePartRef.current != null
-        && fractionalPartRef.current != null
-      ) {
-        const timeValue = stopwatchRef.current.getElapsedTime(timestamp)
-        const {
-          formattedTimeParts,
-          fontSizeClass,
-          radialWipeProgress,
-        } = computeDisplayData(timeValue)
+      if (lastUpdateRef.current == null || timestamp - lastUpdateRef.current >= FPS_INTERVAL_MS) {
+        lastUpdateRef.current = timestamp
 
-        let el: HTMLElement
-        el = progressRef.current
-        if (el.style.getPropertyValue('--progress') !== `${radialWipeProgress}%`) {
-          el.style.setProperty('--progress', `${radialWipeProgress}%`)
-        }
-        el = timerDisplayRef.current
-        if (!el.classList.contains(fontSizeClass)) {
-          el.classList.remove("text-lg", "text-xl", "text-2xl")
-          el.classList.add(fontSizeClass)
-        }
-        el = wholePartRef.current
-        if (el.textContent !== formattedTimeParts.whole) {
-          el.textContent = formattedTimeParts.whole
-        }
-        el = fractionalPartRef.current
-        if (el.textContent !== formattedTimeParts.fractional) {
-          el.textContent = formattedTimeParts.fractional
+        if (
+          progressRef.current != null
+          && timerDisplayRef.current != null
+          && wholePartRef.current != null
+          && fractionalPartRef.current != null
+        ) {
+          const timeValue = stopwatchRef.current.getElapsedTime(timestamp)
+          const {
+            formattedTimeParts,
+            fontSizeClass,
+            radialWipeProgress,
+          } = computeDisplayData(timeValue)
+
+          let el: HTMLElement
+          el = progressRef.current
+          if (el.style.getPropertyValue('--progress') !== `${radialWipeProgress}%`) {
+            el.style.setProperty('--progress', `${radialWipeProgress}%`)
+          }
+          el = timerDisplayRef.current
+          if (!el.classList.contains(fontSizeClass)) {
+            el.classList.remove("text-lg", "text-xl", "text-2xl")
+            el.classList.add(fontSizeClass)
+          }
+          el = wholePartRef.current
+          if (el.textContent !== formattedTimeParts.whole) {
+            el.textContent = formattedTimeParts.whole
+          }
+          el = fractionalPartRef.current
+          if (el.textContent !== formattedTimeParts.fractional) {
+            el.textContent = formattedTimeParts.fractional
+          }
         }
       }
 
