@@ -107,6 +107,7 @@ const FPS_INTERVAL_MS = 1000 / FPS
 export function useStopwatchAnimation({
   stopwatchRef,
   running,
+  containerRef,
   progressRef,
   timerDisplayRef,
   wholePartRef,
@@ -114,65 +115,95 @@ export function useStopwatchAnimation({
 }: {
   stopwatchRef: React.RefObject<ReactifiedStopwatch>
   running: boolean
+  containerRef: React.RefObject<HTMLDivElement | null>
   progressRef: React.RefObject<HTMLDivElement | null>
   timerDisplayRef: React.RefObject<HTMLDivElement | null>
   wholePartRef: React.RefObject<HTMLSpanElement | null>
   fractionalPartRef: React.RefObject<HTMLSpanElement | null>
 }) {
-  const rafHandleRef: React.RefObject<number | null> = React.useRef(null)
-  const lastUpdateRef: React.RefObject<number | null> = React.useRef(null)
+  const rafIdRef = React.useRef<number | null>(null)
+  const lastTimestampRef = React.useRef<number | null>(null)
+  const cacheRef = React.useRef({
+    progress: "",
+    fontSizeClass: "",
+    whole: "",
+    fractional: "",
+  })
 
   React.useEffect(() => {
     if (!running) { return }
 
     function animate(timestamp: DOMHighResTimeStamp) {
-      if (lastUpdateRef.current == null || timestamp - lastUpdateRef.current >= FPS_INTERVAL_MS) {
-        lastUpdateRef.current = timestamp
+      const lastTimestamp = lastTimestampRef.current
+      if (lastTimestamp == null || timestamp - lastTimestamp >= FPS_INTERVAL_MS) {
+        lastTimestampRef.current = timestamp
 
         if (
-          progressRef.current != null
-          && timerDisplayRef.current != null
-          && wholePartRef.current != null
-          && fractionalPartRef.current != null
-        ) {
-          const timeValue = stopwatchRef.current.getElapsedTime(timestamp)
-          const {
-            formattedTimeParts,
-            fontSizeClass,
-            radialWipeProgress,
-          } = computeDisplayData(timeValue)
+          progressRef.current == null
+          || timerDisplayRef.current == null
+          || wholePartRef.current == null
+          || fractionalPartRef.current == null
+        ) { throw Error() }
 
-          let el: HTMLElement
-          el = progressRef.current
-          if (el.style.getPropertyValue('--progress') !== `${radialWipeProgress}%`) {
-            el.style.setProperty('--progress', `${radialWipeProgress}%`)
-          }
-          el = timerDisplayRef.current
-          if (!el.classList.contains(fontSizeClass)) {
-            el.classList.remove("text-lg", "text-xl", "text-2xl")
-            el.classList.add(fontSizeClass)
-          }
-          el = wholePartRef.current
-          if (el.textContent !== formattedTimeParts.whole) {
-            el.textContent = formattedTimeParts.whole
-          }
-          el = fractionalPartRef.current
-          if (el.textContent !== formattedTimeParts.fractional) {
-            el.textContent = formattedTimeParts.fractional
-          }
+        const timeValue = stopwatchRef.current.getElapsedTime(timestamp)
+        const data = computeDisplayData(timeValue)
+        const cache = cacheRef.current
+
+        let v: string
+        v = `${data.radialWipeProgress.toFixed(2)}%`
+        if (cache.progress !== v) {
+          cache.progress = v
+          progressRef.current.style.setProperty('--progress', v)
+        }
+        v = data.fontSizeClass
+        if (cache.fontSizeClass !== v) {
+          cache.fontSizeClass = v
+          timerDisplayRef.current.classList.remove("text-lg", "text-xl", "text-2xl")
+          timerDisplayRef.current.classList.add(v)
+        }
+        v = data.formattedTimeParts.whole
+        if (cache.whole !== v) {
+          cache.whole = v
+          wholePartRef.current.textContent = v
+        }
+        v = data.formattedTimeParts.fractional
+        if (cache.fractional !== v) {
+          cache.fractional = v
+          fractionalPartRef.current.textContent = v
         }
       }
 
-      rafHandleRef.current = running ? requestAnimationFrame(animate) : null
+      rafIdRef.current = requestAnimationFrame(animate)
     }
-    rafHandleRef.current = requestAnimationFrame(animate)
+    rafIdRef.current = requestAnimationFrame(animate)
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (rafIdRef.current == null) {
+          rafIdRef.current = requestAnimationFrame(animate)
+        }
+      } else {
+        if (rafIdRef.current != null) {
+          cancelAnimationFrame(rafIdRef.current)
+          rafIdRef.current = null
+        }
+      }
+    }, { threshold: 0 })
+    if (containerRef.current == null) { throw Error() }
+    observer.observe(containerRef.current)
+
     return () => {
-      if (rafHandleRef.current == null) { return }
-      cancelAnimationFrame(rafHandleRef.current)
+      if (rafIdRef.current != null) {
+        cancelAnimationFrame(rafIdRef.current)
+        rafIdRef.current = null
+      }
+
+      observer.disconnect()
     }
   }, [
     stopwatchRef,
     running,
+    containerRef,
     progressRef,
     timerDisplayRef,
     wholePartRef,

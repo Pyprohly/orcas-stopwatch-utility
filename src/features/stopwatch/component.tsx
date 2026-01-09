@@ -183,6 +183,7 @@ export function Stopwatch({
     setRestoreStateEffectTrigger,
   })
 
+  const containerRef = React.useRef<HTMLDivElement>(null)
   const progressRef = React.useRef<HTMLDivElement>(null)
   const timerDisplayRef = React.useRef<HTMLDivElement>(null)
   const wholePartRef = React.useRef<HTMLSpanElement>(null)
@@ -191,6 +192,7 @@ export function Stopwatch({
   stopwatchHooks.useStopwatchAnimation({
     stopwatchRef,
     running,
+    containerRef,
     progressRef,
     timerDisplayRef,
     wholePartRef,
@@ -212,6 +214,7 @@ export function Stopwatch({
   if (!hasMounted) { return null }
   return (
     <div
+      ref={containerRef}
       className={cn(
         "bg-card relative isolate max-w-[200px] min-w-[160px] overflow-hidden border p-2 shadow-sm",
         "rounded-[min(calc(var(--radius)*2),26px)]",
@@ -232,7 +235,7 @@ export function Stopwatch({
         ref={progressRef}
         className="pointer-events-none absolute inset-0 opacity-35"
         style={{
-          '--progress': `${radialWipeProgress}%`,
+          '--progress': `${radialWipeProgress.toFixed(2)}%`,
           '--color': lightModeActive
               ? "oklch(from var(--muted) calc((l + .76) / 2) c h)"
               : "oklch(from var(--muted) calc((l + .52) / 2) c h)"
