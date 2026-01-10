@@ -1,3 +1,4 @@
+'use client'
 
 import * as lucide from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -39,7 +40,11 @@ export function FlagButton({
       onClick={(_ev) => onClick()}
       onTouchEnd={(ev) => {
         ev.preventDefault()
-        onClick()
+        const touch = ev.changedTouches[0]
+        const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (ev.currentTarget.contains(elementAtPoint)) {
+          onClick()
+        }
       }}
       aria-label={`Toggle ${color} flag`}
       aria-pressed={active}

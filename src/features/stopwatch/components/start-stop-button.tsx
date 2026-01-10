@@ -1,3 +1,4 @@
+"use client"
 
 import * as lucide from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,9 +16,13 @@ export function StartStopButton({
     <Button
       type="button"
       onClick={onStop}
-      onTouchEnd={(ev) => {
+      onTouchEnd={ev => {
         ev.preventDefault()
-        onStop()
+        const touch = ev.changedTouches[0]
+        const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (ev.currentTarget.contains(elementAtPoint)) {
+          onStop()
+        }
       }}
       variant="default"
       size="icon"
@@ -33,9 +38,14 @@ export function StartStopButton({
     <Button
       type="button"
       onClick={onStart}
-      onTouchEnd={(ev) => {
+      onTouchEnd={ev => {
         ev.preventDefault()
-        onStart()
+
+        const touch = ev.changedTouches[0]
+        const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (ev.currentTarget.contains(elementAtPoint)) {
+          onStart()
+        }
       }}
       variant="default"
       size="icon"

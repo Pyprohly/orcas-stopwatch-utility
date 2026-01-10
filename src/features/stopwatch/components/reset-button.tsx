@@ -1,3 +1,4 @@
+'use client'
 
 import * as lucide from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,7 +16,11 @@ export function ResetButton({
       onClick={(_ev) => onClick()}
       onTouchEnd={(ev) => {
         ev.preventDefault()
-        onClick()
+        const touch = ev.changedTouches[0]
+        const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (ev.currentTarget.contains(elementAtPoint)) {
+          onClick()
+        }
       }}
       suppressHydrationWarning  // Firefox
       disabled={disabled}

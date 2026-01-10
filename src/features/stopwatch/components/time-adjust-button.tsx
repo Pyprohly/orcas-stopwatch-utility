@@ -1,3 +1,4 @@
+'use client'
 
 import { Button } from "@/components/ui/button"
 
@@ -17,7 +18,11 @@ export function TimeAdjustButton({
       onClick={(_ev) => onClick()}
       onTouchEnd={(ev) => {
         ev.preventDefault()
-        onClick()
+        const touch = ev.changedTouches[0]
+        const elementAtPoint = document.elementFromPoint(touch.clientX, touch.clientY)
+        if (ev.currentTarget.contains(elementAtPoint)) {
+          onClick()
+        }
       }}
       variant="ghost"
       size="icon"
