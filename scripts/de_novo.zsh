@@ -38,7 +38,7 @@ file=package.json
 sed -i.bak -- \
         '/^[\t ]*"name": "/ s/"name": .*$/"name": "'"$PACKAGE_NAME"'",/' \
         "$file"
-rm -- "$file".bak
+rm -f -- "$file".bak
 
 git add -A
 
@@ -141,7 +141,7 @@ git commit -m 'Add de novo script'
     sed -i.bak -- \
             '/^[\t ]*"version": "/ s/"version": "[^"]*"/"version": "'"$version"'"/' \
             "$file"
-    rm -- "$file".bak
+    rm -f -- "$file".bak
 
     mkdir -p '.github/workflows'
     file='.github/workflows/nextjs.yml'
