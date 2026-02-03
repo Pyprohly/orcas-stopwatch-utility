@@ -21,12 +21,10 @@ export const metadata: Metadata = {
   robots: "none",
 }
 
-
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className="overscroll-y-none">
-      <DarkModePreferenceFacilitator preventTransitions>
+      <DarkModePreferenceFacilitator preventTransitions watchSystemPreference>
         <MyVisualStylePreferenceFacilitator storageKey="theme" preventTransitions>
           <head>
             <DarkModeNoFoucScript />
