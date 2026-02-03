@@ -79,6 +79,7 @@ export function VisualStylePreferenceFacilitator({
   defaultUserVisualStylePreference = null,
   onVisualStyleChange,
   preventTransitions = false,
+  watchLocalStorage = false,
   placeholders,
   storage = localStorage,
 }: {
@@ -87,6 +88,7 @@ export function VisualStylePreferenceFacilitator({
   defaultUserVisualStylePreference?: string | null
   onVisualStyleChange?: (visualStyle: string | null) => void
   preventTransitions?: boolean
+  watchLocalStorage?: boolean
   placeholders?: {
     userVisualStylePreference?: string | null
     commitUserVisualStylePreference?: (userVisualStylePreference: string | null) => void
@@ -123,6 +125,18 @@ export function VisualStylePreferenceFacilitator({
       onVisualStyleChangeEffectEvent(userVisualStylePreference)
     }
   }, [hasMounted, preventTransitions, userVisualStylePreference])
+
+  React.useEffect(function attachLocalStorageListener() {
+    if (!watchLocalStorage) { return }
+    if (storageKey == null) { return }
+    function listener(ev: StorageEvent) {
+      if (ev.key !== storageKey) { return }
+      if (ev.newValue == null) { return }
+      setUserVisualStylePreference(ev.newValue)
+    }
+    window.addEventListener('storage', listener)
+    return () => window.removeEventListener('storage', listener)
+  }, [watchLocalStorage, storageKey])
 
   function setAndSaveUserVisualStylePreference(userVisualStylePreference: string | null): void {
     setUserVisualStylePreference(userVisualStylePreference)

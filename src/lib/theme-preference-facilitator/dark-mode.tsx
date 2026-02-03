@@ -88,7 +88,8 @@ export function DarkModePreferenceFacilitator({
   defaultUserDarkModePreference = 'system',
   onDarkModeChange,
   preventTransitions = false,
-  disableWatchSystemPreference = false,
+  watchLocalStorage = false,
+  watchSystemPreference = false,
   placeholders,
   storage = localStorage,
 }: {
@@ -97,7 +98,8 @@ export function DarkModePreferenceFacilitator({
   defaultUserDarkModePreference?: UserDarkModePreference
   onDarkModeChange?: (darkModeActive: boolean) => void
   preventTransitions?: boolean
-  disableWatchSystemPreference?: boolean
+  watchSystemPreference?: boolean
+  watchLocalStorage?: boolean
   placeholders?: {
     userDarkModePreference?: UserDarkModePreference
     commitUserDarkModePreference?: (userDarkModePreference: UserDarkModePreference) => void
@@ -149,15 +151,28 @@ export function DarkModePreferenceFacilitator({
     }
   }, [hasMounted, preventTransitions, darkModeActive])
 
-  React.useEffect(function matchMediaListener() {
-    if (disableWatchSystemPreference) { return }
+  React.useEffect(function attachMatchMediaListener() {
+    if (!watchSystemPreference) { return }
     if (userDarkModePreference !== 'system') { return }
 
     function listener(ev: MediaQueryListEvent) { setSystemPrefersDarkMode(ev.matches) }
     const media = matchMedia("(prefers-color-scheme: dark)")
     media.addEventListener('change', listener)
     return () => media.removeEventListener('change', listener)
-  }, [disableWatchSystemPreference, userDarkModePreference])
+  }, [watchSystemPreference, userDarkModePreference])
+
+  React.useEffect(function attachLocalStorageListener() {
+    if (!watchLocalStorage) { return }
+    if (storageKey == null) { return }
+    function listener(ev: StorageEvent) {
+      if (ev.key !== storageKey) { return }
+      if (ev.newValue == null) { return }
+      if (!isUserDarkModePreference(ev.newValue)) { return }
+      setUserDarkModePreference(ev.newValue)
+    }
+    window.addEventListener('storage', listener)
+    return () => window.removeEventListener('storage', listener)
+  }, [watchLocalStorage, storageKey])
 
   function setAndSaveUserDarkModePreference(userDarkModePreference: UserDarkModePreference): void {
     setUserDarkModePreference(userDarkModePreference)
