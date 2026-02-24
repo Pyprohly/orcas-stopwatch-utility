@@ -8,18 +8,15 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    rules: {
-      "no-var": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-    },
-  },
-  {
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "use-client": useClientPlugin,
     },
     rules: {
+      "no-var": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react/no-children-prop": "off",
       "use-client/use-client-hook": "warn",
       "use-client/browser-api": "warn",
       "use-client/event-handler": "warn",
